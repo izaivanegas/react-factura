@@ -24,6 +24,63 @@ export const InvoiceApp = ()=>{
     const[counter, setCounter] = useState(4);
     const[errorMsg, setErrorMsg] = useState('');
 
+
+    const onProductChange = ({target})=>{
+        console.log("Product"+target.value);
+        setProductoValue(target.value);
+    };
+
+    const onPrecioChange= ({target})=>{
+        console.log("Product"+target.value);
+        setPrecioValue(target.value);
+    }
+
+    const onCantidadChange= ({target})=>{
+        console.log("Product"+target.value);
+        setCantidadValue(target.value);
+    };
+
+    const onInvoiceSubmit = (e)=>{
+        //Se evita el envio del formulario
+        e.preventDefault();
+
+        //validacion
+        if(productoValue.trim().length <= 1){
+            setErrorMsg("Necesita el producto");
+            return;
+        }
+        if(precioValue.trim().length <= 0){
+            setErrorMsg( "Necesita el precio");
+            return;
+        }
+        if(isNaN(precioValue.trim())){
+            setErrorMsg( "El precio debe de ser un numero");
+            return;
+        }
+        if(cantidadValue.trim().length <= 0){
+            setErrorMsg( "Necesita la cantidad");
+            return ;
+        }
+        if(isNaN(cantidadValue.trim())){
+            setErrorMsg( "La cantidad debe de ser un numero");
+            return;
+        }
+
+
+
+        setItems([...items, {
+            id: counter,
+            product: productoValue.trim(),
+            price: +precioValue.trim(),
+            quantity: parseInt(cantidadValue.trim(),10) }])
+        setProductoValue('');
+        setPrecioValue('');
+        setCantidadValue('');
+        setCounter(counter+1);
+        setErrorMsg('')
+    }
+
+
      return (
          <div className="container">
              <div className="card my-3">
@@ -48,70 +105,24 @@ export const InvoiceApp = ()=>{
 
                  <ListItemsView  title="Productos de la factura" items={ items }/>
                  <TotalView  title="Total de la factura" total={ total }/>
-                 <form  className="w-25" onSubmit={(e)=>{
-                     //Se evita el envio del formulario
-                     e.preventDefault();
-
-                     //validacion
-                     if(productoValue.trim().length <= 1){
-                         setErrorMsg("Necesita el producto");
-                        return;
-                     }
-                     if(precioValue.trim().length <= 0){
-                         setErrorMsg( "Necesita el precio");
-                         return;
-                     }
-                     if(isNaN(precioValue.trim())){
-                         setErrorMsg( "El precio debe de ser un numero");
-                         return;
-                     }
-                     if(cantidadValue.trim().length <= 0){
-                        setErrorMsg( "Necesita la cantidad");
-                        return ;
-                     }
-                    if(isNaN(cantidadValue.trim())){
-                        setErrorMsg( "La cantidad debe de ser un numero");
-                        return;
-                    }
-
-
-
-                     setItems([...items, {
-                         id: counter,
-                         product: productoValue.trim(),
-                         price: +precioValue.trim(),
-                         quantity: parseInt(cantidadValue.trim(),10) }])
-                     setProductoValue('');
-                     setPrecioValue('');
-                     setCantidadValue('');
-                     setCounter(counter+1);
-                     setErrorMsg('')
-                 }}>
+                 <form  className="w-25"
+                        onSubmit={(e)=>{ onInvoiceSubmit(e)}}>
                      <input type="text" name="product" placeholder="Producto"
-                            onChange={(e)=> {
-                                console.log("Product"+e.target.value);
-                                setProductoValue(e.target.value);
-                            }}
+                            onChange={ onProductChange }
                             className="form-control m-3"
                      value={productoValue}/>
 
 
 
                      <input type="text" name="Precio" placeholder="Precio"
-                            onChange={(e)=> {
-                         console.log("Product"+e.target.value);
-                         setPrecioValue(e.target.value);
-                     }}
+                            onChange={(e)=> {onPrecioChange(e)}}
                             className="form-control m-3"
                      value={precioValue}/>
 
 
                      <input type="text" name="Cantidad" placeholder="Cantidad"
 
-                            onChange={(e)=> {
-                                console.log("Product"+e.target.value);
-                                setCantidadValue(e.target.value);
-                            }}
+                            onChange={(e)=> {onCantidadChange(e)}}
                             className="form-control m-3"
                      value={cantidadValue}
                      />
