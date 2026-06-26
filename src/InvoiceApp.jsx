@@ -17,28 +17,28 @@ export const InvoiceApp = ()=>{
 
     const {name: nameCompany, fiscalNumber} = company;
 
-    const[productoValue, setProductoValue] = useState('');
-    const[precioValue, setPrecioValue] = useState('');
-    const[cantidadValue, setCantidadValue] = useState('');
+    const[invoiceItemsState,setInvoiceItemsState] = useState({
+        productoValue: '',
+        precioValue:'',
+        cantidadValue:'',
+    });
+
+
+    const {productoValue, precioValue, cantidadValue} = invoiceItemsState;
+
+
     const[items, setItems] = useState(itemsInicial);
     const[counter, setCounter] = useState(4);
     const[errorMsg, setErrorMsg] = useState('');
 
 
-    const onProductChange = ({target})=>{
-        console.log("Product"+target.value);
-        setProductoValue(target.value);
+    const onIvoiceItemChange = ({target:{name, value}})=>{
+        setInvoiceItemsState({
+            ...invoiceItemsState, [name]:value
+        })
+
     };
 
-    const onPrecioChange= ({target})=>{
-        console.log("Product"+target.value);
-        setPrecioValue(target.value);
-    }
-
-    const onCantidadChange= ({target})=>{
-        console.log("Product"+target.value);
-        setCantidadValue(target.value);
-    };
 
     const onInvoiceSubmit = (e)=>{
         //Se evita el envio del formulario
@@ -73,9 +73,15 @@ export const InvoiceApp = ()=>{
             product: productoValue.trim(),
             price: +precioValue.trim(),
             quantity: parseInt(cantidadValue.trim(),10) }])
-        setProductoValue('');
-        setPrecioValue('');
-        setCantidadValue('');
+
+
+        setInvoiceItemsState({
+            productoValue: '',
+            precioValue: '',
+            cantidadValue: ''
+        })
+
+
         setCounter(counter+1);
         setErrorMsg('')
     }
@@ -107,24 +113,24 @@ export const InvoiceApp = ()=>{
                  <TotalView  title="Total de la factura" total={ total }/>
                  <form  className="w-25"
                         onSubmit={(e)=>{ onInvoiceSubmit(e)}}>
-                     <input type="text" name="product" placeholder="Producto"
-                            onChange={ onProductChange }
+                     <input type="text" name="productoValue" placeholder="Producto"
+                            onChange={ onIvoiceItemChange }
                             className="form-control m-3"
-                     value={productoValue}/>
+                     value={invoiceItemsState.productoValue}/>
 
 
 
-                     <input type="text" name="Precio" placeholder="Precio"
-                            onChange={(e)=> {onPrecioChange(e)}}
+                     <input type="text" name="precioValue" placeholder="Precio"
+                            onChange={(e)=> {onIvoiceItemChange(e)}}
                             className="form-control m-3"
-                     value={precioValue}/>
+                     value={invoiceItemsState.precioValue}/>
 
 
-                     <input type="text" name="Cantidad" placeholder="Cantidad"
+                     <input type="text" name="cantidadValue" placeholder="Cantidad"
 
-                            onChange={(e)=> {onCantidadChange(e)}}
+                            onChange={(e)=> {onIvoiceItemChange(e)}}
                             className="form-control m-3"
-                     value={cantidadValue}
+                     value={invoiceItemsState.cantidadValue}
                      />
                      <button type="submit"
                              className="btn btn-primary m-3">
