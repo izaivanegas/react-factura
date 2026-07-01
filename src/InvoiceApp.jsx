@@ -1,15 +1,80 @@
-import {getInvoice} from "./services/getInvoice.js";
+import {getInvoice, calculateTotal} from "./services/getInvoice.js";
 
 import {InvoiceView} from "./components/InvoiceView.jsx";
 import {ClientView} from "./components/ClientView.jsx";
 import {CompanyView} from "./components/CompanyView.jsx";
 import {ListItemsView} from "./components/ListItemsView.jsx";
 import {TotalView} from "./components/TotalView.jsx";
-import {useState} from "react";
+import {useEffect, useState} from "react";
+
+
+import {FormItemsView} from "./components/FormItemsView";
+
+const invoiceInitial = {
+    id: 10,
+    name: 'Componentes PC',
+    client: {
+        name: 'Pepe',
+        lastName: 'Doe',
+        address: {
+            country: 'USA',
+            city: 'Los Angeles',
+            street: 'One Street',
+            number: 12
+        }
+    },
+    company: {
+        name: 'New Egg',
+        fiscalNumber: 1234567,
+    },
+    items: [
+
+    ]
+};
 
 export const InvoiceApp = ()=>{
 
-    const {id, name, client, company, items:itemsInicial, total} = getInvoice();
+
+    const [invoice,setInvoice] = useState( invoiceInitial );
+
+
+
+    const[counter, setCounter] = useState(4);
+
+
+    const {id, name, client, company} = invoice;
+
+
+
+
+    const[items, setItems] = useState([]);
+
+    const [total, setTotal ] = useState(0);
+
+
+    const [activeForm,setActiveForm] = useState(false);
+
+    useEffect(()=>{
+        const data = getInvoice();
+        setInvoice(data);
+        setItems(data.items)
+    },[]);
+    
+
+
+
+    useEffect(()=>{
+        console.log("El counter ca,mbio")
+    },[counter]);
+
+    useEffect(()=>{
+        console.log("los items cambiaron")
+        setTotal(calculateTotal(items))
+    },[items]);
+
+
+
+
 
     const {name: nameClient, lastName, address} = client;
 
@@ -17,75 +82,26 @@ export const InvoiceApp = ()=>{
 
     const {name: nameCompany, fiscalNumber} = company;
 
-    const[invoiceItemsState,setInvoiceItemsState] = useState({
-        productoValue: '',
-        precioValue:'',
-        cantidadValue:'',
-    });
 
-
-    const {productoValue, precioValue, cantidadValue} = invoiceItemsState;
-
-
-    const[items, setItems] = useState(itemsInicial);
-    const[counter, setCounter] = useState(4);
-    const[errorMsg, setErrorMsg] = useState('');
-
-
-    const onIvoiceItemChange = ({target:{name, value}})=>{
-        setInvoiceItemsState({
-            ...invoiceItemsState, [name]:value
-        })
-
-    };
-
-
-    const onInvoiceSubmit = (e)=>{
-        //Se evita el envio del formulario
-        e.preventDefault();
-
-        //validacion
-        if(productoValue.trim().length <= 1){
-            setErrorMsg("Necesita el producto");
-            return;
-        }
-        if(precioValue.trim().length <= 0){
-            setErrorMsg( "Necesita el precio");
-            return;
-        }
-        if(isNaN(precioValue.trim())){
-            setErrorMsg( "El precio debe de ser un numero");
-            return;
-        }
-        if(cantidadValue.trim().length <= 0){
-            setErrorMsg( "Necesita la cantidad");
-            return ;
-        }
-        if(isNaN(cantidadValue.trim())){
-            setErrorMsg( "La cantidad debe de ser un numero");
-            return;
-        }
-
-
+    const handlerAddItems = ({product, price, quantity})=>{
 
         setItems([...items, {
             id: counter,
-            product: productoValue.trim(),
-            price: +precioValue.trim(),
-            quantity: parseInt(cantidadValue.trim(),10) }])
-
-
-        setInvoiceItemsState({
-            productoValue: '',
-            precioValue: '',
-            cantidadValue: ''
-        })
-
+            product: product.trim(),
+            price: +price.trim(),
+            quantity: parseInt(quantity.trim(),10) }])
 
         setCounter(counter+1);
-        setErrorMsg('')
     }
 
+    const handlerDeleteItems = (id)=>{
+        setItems(items.filter(item=>item.id !== id));
+    }
+
+
+    const onActiveForm = ()=>{
+        setActiveForm(!activeForm);
+    }
 
      return (
          <div className="container">
@@ -109,36 +125,14 @@ export const InvoiceApp = ()=>{
 
              </div>
 
-                 <ListItemsView  title="Productos de la factura" items={ items }/>
+                 <ListItemsView  title="Productos de la factura" items={ items } handledelete={handlerDeleteItems}/>
                  <TotalView  title="Total de la factura" total={ total }/>
-                 <form  className="w-25"
-                        onSubmit={(e)=>{ onInvoiceSubmit(e)}}>
-                     <input type="text" name="productoValue" placeholder="Producto"
-                            onChange={ onIvoiceItemChange }
-                            className="form-control m-3"
-                     value={invoiceItemsState.productoValue}/>
+                 <button className="btn btn-secondary" onClick={onActiveForm}>
+                     {!activeForm?'Agregar Item':'Ocultar Item'}
+                 </button>
 
+                 {!activeForm || <FormItemsView handler={handlerAddItems}/>}
 
-
-                     <input type="text" name="precioValue" placeholder="Precio"
-                            onChange={(e)=> {onIvoiceItemChange(e)}}
-                            className="form-control m-3"
-                     value={invoiceItemsState.precioValue}/>
-
-
-                     <input type="text" name="cantidadValue" placeholder="Cantidad"
-
-                            onChange={(e)=> {onIvoiceItemChange(e)}}
-                            className="form-control m-3"
-                     value={invoiceItemsState.cantidadValue}
-                     />
-                     <button type="submit"
-                             className="btn btn-primary m-3">
-                         Agregar producto</button>
-                     <div className="text-danger">
-                         {errorMsg}
-                     </div>
-             </form>
              </div>
              </div>
          </div>
